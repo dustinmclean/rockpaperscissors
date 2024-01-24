@@ -1,92 +1,66 @@
-
-const options = ["rock", "paper", "scissors"];
-
-
-function getComputerChoice() {
-    const num = Math.floor(Math.random() * 3);
-
-    if (num === 0) {
-        return "rock";
-    } else if (num === 1) {
-        return "paper";
-    } else {
-        return "scissors";
-    }
+const selectionButtons = document.querySelectorAll("[data-selection")
+const finalColumn = document.querySelector("[data-final-column")
+const computerScoreSpan = document.querySelector("[data-computer-score")
+const yourScoreSpan = document.querySelector("[data-your-score")
+const SELECTIONS = [
+{
+    name: "rock", 
+    emoji: "👊", 
+    beats: "scissors"
+},
+{
+    name: "paper", 
+    emoji: "✋", 
+    beats: "rock"
+},
+{
+    name: "scissors", 
+    emoji: "✌️", 
+    beats: "paper"
 }
 
-function playRound(playerSelection, computerSelection) {
+]
 
-   // let playerLowerSelection = playerSelection.toLowerCase();
+selectionButtons.forEach(selectionButton => {
+    selectionButton.addEventListener("click", e => {
+        const selectionName = selectionButton.dataset.selection
+        const selection = SELECTIONS.find(selection => selection.name === selectionName)
+        makeSelection(selection)
+    })
+})
 
-    if (playerSelection === computerSelection) {
-        return "tie";
-    } else if ((playerSelection === "rock" && computerSelection === "scissors") ||
-        (playerSelection === "paper" && computerSelection === "rock") ||
-        (playerSelection === "scissors" && computerSelection === "paper")) {
-          return "player";
-        } else {
-          return "computer"
-        }
-}
+    function makeSelection(selection) {
+        const computerSelection = randomSelection()
+        const yourWinner = isWinner(selection, computerSelection)
+        const computerWinner = isWinner(computerSelection, selection)
+        
+        addSelectionResult(computerSelection, computerWinner)
+        addSelectionResult(selection, yourWinner)
 
-function printResults(playerSelection, computerSelection) {
-    const result = playRound(playerSelection, computerSelection);
-      if (result == "tie") {
-        return "It's a tie, play again";
-      } else if (result == "player") {
-        return "You win";
-      } else {
-        return "You lose";
-      }
-}
-
-
-// the above shit, I'm pretty sure I understand, and could make from scratch again, the rest is hard: 
-
-// create a function to 'get' input from the user, and store it in a variable
-
-function askPlayerChoice() {
-    let validatedInput = false;
-    while(validatedInput == false) {
-        const choice = prompt("Rock, paper, or scissors...");
-        if (choice == null) {
-            continue;
-        }
-        const choiceInLower = choice.toLowerCase();
-        if(options.includes(choiceInLower)) {
-            validatedInput = true;
-            return choiceInLower;
-        }
+        if (yourWinner) incrementScore(yourScoreSpan)
+        if (computerWinner) incrementScore(computerScoreSpan)
     }
+
+function incrementScore(scoreSpan) {
+    scoreSpan.innerText = parseInt(scoreSpan.innerText) +1
+}
+
+function addSelectionResult(selection, winner) {
+    const div = document.createElement("div")
+    div.innerText = selection.emoji
+    div.classList.add("result-selection")
+    if (winner) div.classList.add("winner")
+
+    finalColumn.after(div)
+
+}
+
+function isWinner(selection, opponentSelection) {
+    return selection.beats === opponentSelection.name
 }
 
 
-function game() {
-    let playerScore = 0;
-    let computerScore = 0;
-    console.log("Welcome To The Game")
-    for (let i = 0; i < 5; i++) {
-        const playerSelection = askPlayerChoice();
-        const computerSelection = getComputerChoice();
-       console.log(printResults(playerSelection, computerSelection));
-       console.log("----------------");
-       if (playRound(playerSelection, computerSelection) == "player") {
-        playerScore++;
-       } 
-       else if (playRound(playerSelection, computerSelection) == "computer") {
-        computerScore++;
-       }
-    }
-    console.log("Game Over");
-    if(playerScore > computerScore) {
-        console.log("You win, you smelly bastard!");
-    }
-    else if (playerScore < computerScore) {
-        console.log("You lose, ya bum");
-    }
-    else {
-        console.log("It's a tie, wasn't that fun?");
-    }
+function randomSelection() {
+    const randomIndex = Math.floor(Math.random() * SELECTIONS.length)
+    return SELECTIONS[randomIndex]
 }
-
-game();
